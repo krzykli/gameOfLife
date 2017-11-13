@@ -236,10 +236,6 @@ WinMain(HINSTANCE windowInstance,
 
         while(PeekMessage(&message, 0, 0, 0, PM_REMOVE))
         {
-            //float aspectRatio = float(windowWidth) / windowHeight;
-            //char message1[256];
-            //sprintf_s(message1, "%.04f", aspectRatio);
-
             if(message.message == WM_QUIT)
             {
                 IS_RUNNING = false;
@@ -263,20 +259,6 @@ WinMain(HINSTANCE windowInstance,
 
                 if (message.wParam & WM_LBUTTONDOWN)
                 {
-                    //char message[256];
-                    //sprintf_s(message, "%i xPos %i yPos\n", xPos, yPos);
-
-                    //point2 pointA = {Buffer.Width / 2, Buffer.Height / 2};
-                    //point2 pointB = {xPos, yPos};
-                    //point2 pointC = {xPos - 10, yPos - 10};
-                    //DrawFilledRectangle(&Buffer, pointC, pointB);
-                    //DrawLine(&Buffer, pointA, pointB);
-                    //DrawCircleBase(&Buffer, pointB, 15, DrawCircleFilledCallback);
-                    //DrawTriangle(&Buffer, pointA, pointB, pointC);
-
-                    //sprintf_s(message, "%i xPos %i yPos %i yPos\n", xPos, yPos);
-
-                    //OutputDebugStringA(message);
                     if (!RUN_SIM)
                     {
                         ColorPixel(&Buffer, Color, xPos, yPos);
@@ -300,7 +282,6 @@ WinMain(HINSTANCE windowInstance,
 
             TranslateMessage(&message);
             DispatchMessageA(&message);
-
         }
 
         if (RUN_SIM)
@@ -327,7 +308,6 @@ WinMain(HINSTANCE windowInstance,
         msElapsed = GetMilisecondsElapsed(StartTime, AfterSleepTime);
         PrintTime(msElapsed, "GAME LOOP");
     }
-
     return 0;
 }
 
