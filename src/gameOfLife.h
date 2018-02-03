@@ -2,11 +2,15 @@
 #define GAMEOFLIFEH
 #include "sunshine_rendering.h"
 
+#define ACTIVE_CELL_COLOR 0x00FFFFFF
+#define INACTIVE_CELL_COLOR 0x00000000
+#define NEW_CELL_COLOR 0x00FF0000
+
 uint32
 IsActiveField(sunshine_offscreen_buffer *Buffer, int x, int y)
 {
     uint32 color = *(uint32 *)GetCanonicalPixelAddress(Buffer, x, y);
-    if (color == ((255 << 16) | (255 << 8) | 255))
+    if (color & NEW_CELL_COLOR & ACTIVE_CELL_COLOR)
     {
          return color;
     }
@@ -57,9 +61,10 @@ AnalizeNeighbours(sunshine_offscreen_buffer *Buffer, int x, int y)
     }
     else
     {
+        int width = Buffer->Width;
         uint32 *leftTopPixel = (uint32 *)GetCanonicalPixelAddress(Buffer, x-1, y-1);
-        uint32 *row1 = (leftTopPixel + Buffer->Width);
-        uint32 *row2 = (leftTopPixel + 2 * Buffer->Width);
+        uint32 *row1 = (leftTopPixel + width);
+        uint32 *row2 = (leftTopPixel + 2 * width);
 
         neighbours[0] = *leftTopPixel;
         neighbours[1] = *(leftTopPixel + 1);
@@ -73,13 +78,13 @@ AnalizeNeighbours(sunshine_offscreen_buffer *Buffer, int x, int y)
         neighbours[7] = *(row2 + 2);
     }
 
-    int active = ((255 << 16) | (255 << 8) | 255);
+    int active = ACTIVE_CELL_COLOR;
     int sum = 0;
     for (int i=0; i < 8; i++)
     {
-        sum += neighbours[i];
+        sum += (neighbours[i] & NEW_CELL_COLOR);
     }
-    return (sum / active);
+    return sum / (uint32)NEW_CELL_COLOR;
 }
 
 #endif //GAMEOFLIFEH

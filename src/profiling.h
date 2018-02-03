@@ -1,3 +1,4 @@
+#include "global_defines.h"
 
 global_variable LARGE_INTEGER _PCFreq;
 
@@ -9,22 +10,34 @@ GetCurrentClockCounter()
      return Result;
 }
 
-float
+uint64
 GetMilisecondsElapsed(LARGE_INTEGER StartTime, LARGE_INTEGER EndTime)
 {
-    LARGE_INTEGER TimeElapsed;
-    TimeElapsed.QuadPart = (
-        (EndTime.QuadPart - StartTime.QuadPart) * 1000 / _PCFreq.QuadPart);
-    return (float)TimeElapsed.QuadPart;
+    LARGE_INTEGER ticksElapsed;
+    ticksElapsed.QuadPart = EndTime.QuadPart - StartTime.QuadPart;
+    //ticksElapsed.QuadPart *= 1000000;
+    //ticksElapsed.QuadPart /= _PCFreq.QuadPart;
+    return ticksElapsed.QuadPart;
 }
 
-void PrintTime(float timeElapsed, char * label)
+void PrintTime(uint64 ticksElapsed, char * label)
 {
     char msPerFrameBuffer[512];
-    int FPS = (int)(1 / (timeElapsed / 1000.0));
-    sprintf_s(msPerFrameBuffer, "[%s] \t\t\t %.06f ms/f \t %i FPS\n",
+    float msElapsed = float(ticksElapsed * 1000000) / _PCFreq.QuadPart;
+    int FPS = (int)(1 / ((msElapsed) / 1000000.0f));
+    sprintf_s(msPerFrameBuffer, "[%s] \t\t\t %i ticks/f \t %i FPS\n",
               label,
-              timeElapsed,
+              ticksElapsed,
               FPS);
+    OutputDebugStringA(msPerFrameBuffer);
+}
+
+void PrintTime(float ticksElapsed, char * label)
+{
+    char msPerFrameBuffer[512];
+    float msElapsed = float(ticksElapsed * 1000000) / _PCFreq.QuadPart;
+    sprintf_s(msPerFrameBuffer, "[%s] \t\t\t %.4f ticks/pixel/f\n",
+              label,
+              ticksElapsed);
     OutputDebugStringA(msPerFrameBuffer);
 }

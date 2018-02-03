@@ -39,12 +39,11 @@ GetPixelAddress(sunshine_offscreen_buffer *Buffer, point2 &Pixel)
     return row += offsetFromOrigin;
 }
 
-void*
+inline void*
 GetCanonicalPixelAddress(sunshine_offscreen_buffer *Buffer, int x, int y)
 {
-    uint8 *row = (uint8 *)Buffer->Memory;
-    int offsetFromOrigin = y * Buffer->Pitch + Buffer->BytesPerPixel * x;
-    return row += offsetFromOrigin;
+    uint32 *row = ((uint32 *)Buffer->Memory + y * Buffer->Width + x);
+    return row;
 }
 
 
@@ -56,7 +55,6 @@ GetPixelAddress(sunshine_offscreen_buffer *Buffer, int x, int y)
         Buffer->BytesPerPixel * x;
     return row += offsetFromOrigin;
 }
-
 
 bool
 IsPixelWithinFrameBufferBounds(sunshine_offscreen_buffer *Buffer, int x0, int y0)

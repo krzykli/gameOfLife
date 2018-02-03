@@ -21,10 +21,10 @@ global_variable bool RUN_SIM;
 #define RGBA(r,g,b,a)        ((COLORREF)( (((DWORD)(BYTE)(a))<<24) |     RGB(r,g,b) ))
 #endif
 
-//int BUFFER_WIDTH = 1280;
-//int BUFFER_HEIGHT = 720;
-int BUFFER_WIDTH = 320;
-int BUFFER_HEIGHT = 200;
+int BUFFER_WIDTH = 1280;
+int BUFFER_HEIGHT = 720;
+//int BUFFER_WIDTH = 100;
+//int BUFFER_HEIGHT = 100;
 
 static void
 Win32InitBuffer(win32_offscreen_buffer *buffer, int width, int height)
@@ -117,6 +117,14 @@ Win32WindowCallback(HWND windowHandle,
             win32_window_dimension clientSize = Win32GetRectDimension(&ClientRect);
             Win32DisplayBufferInWindow(&backBuffer, deviceContextHandle,
                                        clientSize.Width, clientSize.Height);
+
+            //int speed = 1;
+            //char text_message[10];
+            //sprintf_s(text_message, "Speed: %ix", speed);
+            //RECT TextRect = {0, 0, 100, 100};
+            //SetTextColor(deviceContextHandle, RGBA(255, 0, 0, 0));
+            //SetBkColor(deviceContextHandle, RGBA(0, 0, 0, 0));
+            //TextOut(deviceContextHandle, 0, 20, text_message, sizeof(text_message)/sizeof(char));
             EndPaint(windowHandle, &paintStruct);
         } break;
 
@@ -255,7 +263,7 @@ WinMain(HINSTANCE windowInstance,
 
                 xPos = int(roundf(x - 0.5f));
                 yPos = BUFFER_HEIGHT - 1 - int(roundf(y - 0.5f));
-                uint32 Color = ((255 << 16) | (255 << 8) | 255);
+                uint32 Color = ACTIVE_CELL_COLOR;
 
                 if (message.wParam & WM_LBUTTONDOWN)
                 {
@@ -267,15 +275,15 @@ WinMain(HINSTANCE windowInstance,
                 }
             }
 
-            if(message.message == WM_KEYDOWN && message.wParam & VK_SPACE)
+            if(message.message == WM_KEYDOWN)
             {
-                RUN_SIM = !RUN_SIM;
-            }
-            if(message.message == WM_KEYDOWN && message.wParam & 0x43)
-            {
-                if (!RUN_SIM)
+                if (message.wParam == VK_SPACE)
                 {
-                    memset(Buffer.Memory, 0, Buffer.BitmapMemSize);
+                    RUN_SIM = !RUN_SIM;
+                }
+                else if (message.wParam == 0x43) // C key
+                {
+                    memset(Buffer.Memory, 0, Buffer.BitmapMemSize * 2);
                     Win32UpdateWindowCallback();
                 }
             }
@@ -296,17 +304,24 @@ WinMain(HINSTANCE windowInstance,
         }
 
         LARGE_INTEGER EndTime = GetCurrentClockCounter();
-        float msElapsed = GetMilisecondsElapsed(StartTime, EndTime);
+        uint64 ticksElapsed = GetMilisecondsElapsed(StartTime, EndTime);
 
-        float targetMsPerFrame = 16.6f;
-        if (msElapsed < targetMsPerFrame)
+        if (RUN_SIM)
         {
-             Sleep(DWORD(targetMsPerFrame - msElapsed));
+            float targetMsPerFrame = 16.6f;
+            if (ticksElapsed < targetMsPerFrame)
+            {
+                 //Sleep(DWORD(targetMsPerFrame - ticksElapsed));
+            }
+            LARGE_INTEGER AfterSleepTime = GetCurrentClockCounter();
+            ticksElapsed = GetMilisecondsElapsed(StartTime, AfterSleepTime);
+            if (ticksElapsed != 0)
+            {
+                PrintTime(ticksElapsed, "GAME LOOP");
+                PrintTime((float(ticksElapsed) / float(BUFFER_WIDTH * BUFFER_HEIGHT)), "per pixel");
+            }
         }
 
-        LARGE_INTEGER AfterSleepTime = GetCurrentClockCounter();
-        msElapsed = GetMilisecondsElapsed(StartTime, AfterSleepTime);
-        PrintTime(msElapsed, "GAME LOOP");
     }
     return 0;
 }
